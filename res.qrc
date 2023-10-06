@@ -1,0 +1,7 @@
+<RCC>
+  <qresource prefix="menu">
+    <file>resource/file_download_white_24dp.svg</file>
+    <file>resource/update1_white_18dp.svg</file>
+    <file>resource/update2_white_18dp.svg</file>
+  </qresource>
+</RCC>
