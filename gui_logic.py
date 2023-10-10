@@ -85,28 +85,32 @@ def criterion_difference_images(images1, images2):
 
 
 # Проверка размера на степень двойки
-def checking_powers_two(matrix):
+def checking_powers_two(matrix, interpolation=True):
     # Находим ширину и высоту
-    height, width = matrix.shape
+    height_in, width_in = matrix.shape
+    height_out, width_out = height_in, width_in
     start_interpolation = False
 
     # Если высота не степень двойки
-    if height & (height - 1) != 0:
-        print("height")
-        height = 2 ** (int(math.log2(height)) + 1)
+    if height_in & (height_in - 1) != 0:
+        height_out = 2 ** (int(math.log2(height_in)) + 1)
         start_interpolation = True
 
     # Если ширина не степень двойки
-    if width & (width - 1) != 0:
-        print("width")
-        width = 2 ** (int(math.log2(width)) + 1)
+    if width_in & (width_in - 1) != 0:
+        width_out = 2 ** (int(math.log2(width_in)) + 1)
         start_interpolation = True
 
+    matrix_out = matrix
     if start_interpolation:
-        print("start")
-        matrix = Bilinear_Interpolation.matrix_interpolation(matrix, height, width)
+        if interpolation:
+            print(height_in, width_in)
+            matrix_out = Bilinear_Interpolation.matrix_interpolation(matrix, height_out, width_out)
+        else:
+            matrix_out = np.zeros((height_out, width_out))
+            matrix_out[0:height_in, 0:width_in] = matrix[0:height_in, 0:width_in]
 
-    return matrix
+    return matrix_out
 
 
 # КЛАСС АЛГОРИТМА ПРИЛОЖЕНИЯ
@@ -162,6 +166,8 @@ class GuiProgram(Ui_Dialog):
 
         self.half_rectangle_width = None
         self.half_rectangle_height = None
+        self.energy_boundaries_x = None
+        self.energy_boundaries_y = None
 
         self.restored_picture = None
 
@@ -184,7 +190,12 @@ class GuiProgram(Ui_Dialog):
         # Добавление шума
         self.pushButton_display_noise.clicked.connect(self.noise)
         # Добавление шума
-        self.pushButton_start_processing.clicked.connect(self.spectrum_numpy)
+        self.pushButton_start_processing.clicked.connect(self.run_filter_process)
+        # Обновить границы фильтрации энергии
+        self.pushButton_update_energy_filtration.clicked.connect(self.run_filter_process)
+        # Обновить вид отображения спектра
+        self.radioButton_logarithmic_axis.clicked.connect(self.picture_spectrum_and_zone)
+        self.radioButton_linear_axis.clicked.connect(self.picture_spectrum_and_zone)
 
     # ОБРАБОТКА ИНТЕРФЕЙСА
     # Смена режима отображения картинки
@@ -211,8 +222,6 @@ class GuiProgram(Ui_Dialog):
             drawer.image_color_2d(self.graph_original_picture, self.color_picture)
         else:
             drawer.image_gray_2d(self.graph_original_picture, self.original_picture)
-
-        self.noise()
 
     # АЛГОРИТМ РАБОТЫ ПРОГРАММЫ
     # (1г) Вычислить график
@@ -253,7 +262,8 @@ class GuiProgram(Ui_Dialog):
         # Выводим картинку
         drawer.graph_color_2d(self.graph_original_picture, self.original_picture)
         # Проверка на размерность степени двойки для быстрого фурье
-        self.original_picture = checking_powers_two(self.original_picture)
+        self.original_picture = checking_powers_two(self.original_picture,
+                                                    interpolation=self.radioButton_interpolation.isChecked())
 
         # Считаем и показываем шум
         self.noise()
@@ -265,7 +275,7 @@ class GuiProgram(Ui_Dialog):
         #                                                  "Выбрать файл изображения",
         #                                                  ".",
         #                                                  "All Files(*)")
-        filename = "image_256_128.png"
+        filename = "image_150_128.png"
 
         # Загружаем картинку
         self.color_picture = cv2.imread(filename, cv2.IMREAD_COLOR)
@@ -277,7 +287,11 @@ class GuiProgram(Ui_Dialog):
         # Отображаем картинку
         self.display_picture()
         # Проверка на размерность степени двойки для быстрого фурье
-        self.original_picture = checking_powers_two(self.original_picture)
+        self.original_picture = checking_powers_two(self.original_picture,
+                                                    interpolation=self.radioButton_interpolation.isChecked())
+
+        self.noise()
+
 
     # (2) Накладываем шум
     def noise(self):
@@ -324,6 +338,13 @@ class GuiProgram(Ui_Dialog):
         epsilon = criterion_difference_images(self.original_picture, self.noise_image)
         self.label_deviation_original_and_noise.setText(f'{epsilon:.4f}')
 
+    # (3) Процесс обработки
+    def run_filter_process(self):
+        self.spectrum_numpy()  # Считаем спектр
+        self.search_zone()  # Поиск зоны с заданной энергией
+        self.picture_spectrum_and_zone()  # Отрисовка спектра и зоны
+        self.spectrum_nulling()  # Зануляем часть спектра -> self.inverse_fourier() Восстанавливаем
+
     # (3) Спектр от картины с шумом, спектр с диагональной перестановкой
     def spectrum_numpy(self):
         if self.noise_image is None:
@@ -359,8 +380,6 @@ class GuiProgram(Ui_Dialog):
 
         self.module_spectrum_repositioned[0:middle_h, middle_w:width] = \
             module_picture_spectrum[middle_h:height, 0:middle_w]
-
-        self.search_zone()
 
     # (4) поиск ширины и высоты зоны
     def search_zone(self):
@@ -428,25 +447,29 @@ class GuiProgram(Ui_Dialog):
         x4 = half_width - half_rectangle_width - 0.5
         y4 = half_height + half_rectangle_height - 0.5
 
+        # Запоминаем размер области заданного процента энергии
+        self.half_rectangle_width = half_rectangle_width
+        self.half_rectangle_height = half_rectangle_height
+
+        self.energy_boundaries_x = [x1, x2, x3, x4, x1]
+        self.energy_boundaries_y = [y1, y2, y3, y4, y1]
+
+    # (4*) Отрисовка модуля спектра и границы зоны
+    def picture_spectrum_and_zone(self):
+        if self.module_spectrum_repositioned is None:
+            return
+
         # Рисуем модуль спектра
         drawer.graph_color_2d(self.graph_spectrum, self.module_spectrum_repositioned,
                               logarithmic_axis=self.radioButton_logarithmic_axis.isChecked())
 
         # Строим график прямых от точки к точке. Прямоугольник выбранной области
-        self.graph_spectrum.axis.plot(
-            [x1, x2, x3, x4, x1],
-            [y1, y2, y3, y4, y1])
+        self.graph_spectrum.axis.plot(self.energy_boundaries_x, self.energy_boundaries_y)
 
         # Убеждаемся, что все помещается внутри холста
         self.graph_spectrum.figure.tight_layout()
         # Показываем новую фигуру в интерфейсе
         self.graph_spectrum.canvas.draw()
-
-        # Запоминаем размер области заданного процента энергии
-        self.half_rectangle_width = half_rectangle_width
-        self.half_rectangle_height = half_rectangle_height
-
-        self.spectrum_nulling()
 
     # (5) Зануляем комплексный спектр за областью прямоугольника
     def spectrum_nulling(self):

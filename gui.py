@@ -224,7 +224,7 @@ class Ui_Dialog(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName("scrollArea")
         self.scrollAreaWidgetContents = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, -517, 192, 1037))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 192, 1109))
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
         self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout_2.setContentsMargins(0, -1, 3, 0)
@@ -236,6 +236,24 @@ class Ui_Dialog(object):
         self.pushButton_loading_data.setChecked(True)
         self.pushButton_loading_data.setObjectName("pushButton_loading_data")
         self.verticalLayout_2.addWidget(self.pushButton_loading_data)
+        self.groupBox_image_extension_type = QtWidgets.QGroupBox(self.scrollAreaWidgetContents)
+        self.groupBox_image_extension_type.setObjectName("groupBox_image_extension_type")
+        self.layout_image_extension_type = QtWidgets.QVBoxLayout(self.groupBox_image_extension_type)
+        self.layout_image_extension_type.setContentsMargins(6, 0, 0, 5)
+        self.layout_image_extension_type.setSpacing(0)
+        self.layout_image_extension_type.setObjectName("layout_image_extension_type")
+        self.radioButton_interpolation = QtWidgets.QRadioButton(self.groupBox_image_extension_type)
+        self.radioButton_interpolation.setChecked(True)
+        self.radioButton_interpolation.setAutoRepeat(False)
+        self.radioButton_interpolation.setAutoExclusive(True)
+        self.radioButton_interpolation.setObjectName("radioButton_interpolation")
+        self.layout_image_extension_type.addWidget(self.radioButton_interpolation)
+        self.radioButton_padding_zeros = QtWidgets.QRadioButton(self.groupBox_image_extension_type)
+        self.radioButton_padding_zeros.setAutoRepeat(False)
+        self.radioButton_padding_zeros.setAutoExclusive(True)
+        self.radioButton_padding_zeros.setObjectName("radioButton_padding_zeros")
+        self.layout_image_extension_type.addWidget(self.radioButton_padding_zeros)
+        self.verticalLayout_2.addWidget(self.groupBox_image_extension_type)
         self.widget_loading_data = QtWidgets.QWidget(self.scrollAreaWidgetContents)
         self.widget_loading_data.setStyleSheet("")
         self.widget_loading_data.setObjectName("widget_loading_data")
@@ -804,8 +822,38 @@ class Ui_Dialog(object):
         self.lineEdit_percent_energy.setAlignment(QtCore.Qt.AlignCenter)
         self.lineEdit_percent_energy.setObjectName("lineEdit_percent_energy")
         self.layout_spectrum_filtration.addWidget(self.lineEdit_percent_energy)
-        self.layout_spectrum_filtration.setStretch(0, 1)
+        self.pushButton_update_energy_filtration = QtWidgets.QPushButton(self.groupBox_spectrum_filtration)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.pushButton_update_energy_filtration.sizePolicy().hasHeightForWidth())
+        self.pushButton_update_energy_filtration.setSizePolicy(sizePolicy)
+        self.pushButton_update_energy_filtration.setMinimumSize(QtCore.QSize(0, 0))
+        self.pushButton_update_energy_filtration.setMaximumSize(QtCore.QSize(35, 50))
+        self.pushButton_update_energy_filtration.setFocusPolicy(QtCore.Qt.StrongFocus)
+        self.pushButton_update_energy_filtration.setStyleSheet("QPushButton {\n"
+"    /* задает иконку */\n"
+"    background-image: url(:/menu/resource/update1_white_18dp.svg);\n"
+"    background-position:  senter ;\n"
+"\n"
+"    background-repeat: no-repeat;\n"
+"} \n"
+"/* срабатывает, при нажатии*/\n"
+"QPushButton:pressed      {\n"
+"background-image: url(:/menu/resource/update2_white_18dp.svg);\n"
+"}\n"
+"/* срабатывает, когда пользователь наводит на элемент мышью */\n"
+"QPushButton:hover {\n"
+"    border: none;                                                /* без границ */\n"
+"}\n"
+"")
+        self.pushButton_update_energy_filtration.setText("")
+        self.pushButton_update_energy_filtration.setIconSize(QtCore.QSize(40, 40))
+        self.pushButton_update_energy_filtration.setObjectName("pushButton_update_energy_filtration")
+        self.layout_spectrum_filtration.addWidget(self.pushButton_update_energy_filtration)
+        self.layout_spectrum_filtration.setStretch(0, 2)
         self.layout_spectrum_filtration.setStretch(1, 1)
+        self.layout_spectrum_filtration.setStretch(2, 1)
         self.layout_options.addWidget(self.groupBox_spectrum_filtration)
         self.groupBox_select_axes_type = QtWidgets.QGroupBox(self.widget_options)
         self.groupBox_select_axes_type.setObjectName("groupBox_select_axes_type")
@@ -936,12 +984,16 @@ class Ui_Dialog(object):
         self.pushButton_options.clicked['bool'].connect(self.widget_options.setVisible) # type: ignore
         self.pushButton_loading_data.clicked['bool'].connect(self.widget_loading_data.setVisible) # type: ignore
         self.radioButton_generation_domes.toggled['bool'].connect(self.widget_dome_parameters.setVisible) # type: ignore
+        self.pushButton_loading_data.clicked['bool'].connect(self.groupBox_image_extension_type.setVisible) # type: ignore
         QtCore.QMetaObject.connectSlotsByName(Dialog)
 
     def retranslateUi(self, Dialog):
         _translate = QtCore.QCoreApplication.translate
         Dialog.setWindowTitle(_translate("Dialog", "Фильтрация изображения"))
         self.pushButton_loading_data.setText(_translate("Dialog", "Данные"))
+        self.groupBox_image_extension_type.setTitle(_translate("Dialog", "Расширение изображения"))
+        self.radioButton_interpolation.setText(_translate("Dialog", "Интерполяция"))
+        self.radioButton_padding_zeros.setText(_translate("Dialog", "Заполнение 0"))
         self.groupBox_choice_dome_or_picture.setTitle(_translate("Dialog", "Выбор исходных данных"))
         self.radioButton_generation_domes.setText(_translate("Dialog", "Генерация куполов"))
         self.radioButton_loading_pictures.setText(_translate("Dialog", "Загрузка картинки"))
