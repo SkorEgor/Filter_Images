@@ -21,7 +21,6 @@
 3. [ Описание логической структуры - Алгоритм программы ](https://github.com/SkorEgor/Filter_Images#-3-описание-логической-структуры---алгоритм-программы-)
 4. [ Структура программы - Классы и их описание](https://github.com/SkorEgor/Filter_Images#-6-структура-программы---классы-и-их-описание-)
 
-<br><br>
 <!---------------------------------------------------------------------------------->
 
 ---
@@ -60,8 +59,7 @@
    4. К исходному изображению прибавляем произведение шум с матрицей шума
 <div align="center">
 <!--- (2) Картинка исходных данных и разницы -->
-<img src="https://raw.githubusercontent.com/SkorEgor/picturesgifs-for-readme/RobotControl/Image_filter
-/gaus.jpg" >
+<img src="https://raw.githubusercontent.com/SkorEgor/picturesgifs-for-readme/RobotControl/Image_filter/gaus.jpg" >
 </div>
 
 3. Получение спектра. Так как используется быстрое Фурье преобразование в программе предусмотренно автоматическое доведение до степени 2 интерполяцией или дополнением нулями.
